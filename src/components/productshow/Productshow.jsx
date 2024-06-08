@@ -34,6 +34,7 @@ const Productshow = () => {
             <img src={prod.imageUrl} className="w-[300px] " alt={prod.title} />
             <h3>{prod.title}</h3>
             <p>{prod.price}</p>
+            
           </Link>
         ))}
       </div>

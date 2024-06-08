@@ -5,13 +5,16 @@ function Mystate(props) {
   const [allproducts, setallProducts] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [producturl, setproducturl] = useState("");
-  const [cartproduct, setcartproduct] = useState("");
+  const [cartproduct, setCartproduct] = useState([]);
+  const [deliveryDetails, setDeliveryDetails] = useState('')
+
+  console.log(deliveryDetails);
   // it can stre all product
   const addProduct = (newProduct) => {
     setallProducts(newProduct);
   };
   const alldetailproduct = (item, size, quantity, discount) => {
-    setcartproduct({
+    setCartproduct({
       item,
       size,
       quantity,
@@ -30,7 +33,7 @@ function Mystate(props) {
           setproducturl,
           producturl,
           alldetailproduct,
-          cartproduct
+          cartproduct,setCartproduct,setDeliveryDetails
         }}
       >
         {props.children}

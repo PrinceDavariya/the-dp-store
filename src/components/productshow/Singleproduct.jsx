@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
 import MyContext from "../../context/data/Mycontext";
@@ -21,24 +21,24 @@ const SingleProduct = () => {
       </Layout>
     );
   }
+
   const [quantity, setQuantity] = useState(1);
   const [size, setSize] = useState("L");
   const [discount, setDiscount] = useState("100");
 
-  const context = useContext(MyContext);
-  const { alldetailproduct } = context;
+  const { alldetailproduct } = useContext(MyContext);
 
   const handleSize = (size) => {
     setSize(size);
   };
 
-  const handleOrder =async (item) => {
+  const handleOrder = (item) => {
     if (!size) {
       alert('Please select a size.');
       return;
     }
-  await  alldetailproduct(item, size, quantity,discount);
-    navigate('/cart')
+    alldetailproduct(item, size, quantity, discount);
+    navigate('/cart');
   };
 
   return (
@@ -61,7 +61,7 @@ const SingleProduct = () => {
           <div className="relative w-full h-[500px] bg-black overflow-hidden group">
             <img
               src={product.imageUrl2}
-              className="w-full h-full object-cover "
+              className="w-full h-full object-cover"
               alt={product.title}
             />
           </div>
@@ -93,7 +93,7 @@ const SingleProduct = () => {
               name="Quantity"
               className="ml-2 rounded-lg py-0.5"
               value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
+              onChange={(e) => setQuantity(parseInt(e.target.value))}
             >
               {Array.from({ length: 10 }, (_, i) => i + 1).map((q) => (
                 <option key={q} value={q}>
