@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from "react";
-
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import Layout from "../../../components/layout/Layout";
@@ -7,11 +6,13 @@ import { Link, useNavigate } from "react-router-dom";
 import MyContext from "../../../context/data/Mycontext";
 import { appfb } from "../../../firebase/firebase";
 import { get, getDatabase, ref, remove } from "firebase/database";
-  
+
 function Dashboard() {
   const context = useContext(MyContext);
-  const { allproducts } = context;
+  const { allproducts, deliveryDetails, orederdetail } = context;
+  const [orders, setOrders] = useState([]);
   const [product, setproduct] = useState("");
+
   if (!allproducts || allproducts.length === 0) {
     return (
       <Layout>
@@ -27,11 +28,30 @@ function Dashboard() {
     const flattenedProducts = allproducts.flatMap((productArray) =>
       productArray.products.map((product) => ({
         ...product,
-       }))
+      }))
     );
     setProducts(flattenedProducts);
   }, [allproducts]);
-   console.log(products);
+
+  useEffect(() => {
+    // Fetch orders from Firebase
+    const db = getDatabase(appfb);
+    const ordersRef = ref(db, "orders");
+    get(ordersRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const ordersData = snapshot.val();
+          const ordersList = Object.values(ordersData);
+          setOrders(ordersList);
+        } else {
+          console.log("No orders found.");
+        }
+      })
+      .catch((error) => {
+        console.log("Error fetching orders:", error);
+      });
+  }, []);
+
   const deletehandle = async (product) => {
     const db = getDatabase(appfb);
     const productRef = ref(db, `Men/${product.subcategory}`);
@@ -58,11 +78,11 @@ function Dashboard() {
       console.log("Error deleting product:", error);
     }
   };
-  
-const navigate = useNavigate()
+
+  const navigate = useNavigate();
   const updatehandle = (product) => {
-     navigate('/updateproduct',{state:{product}})
-   };
+    navigate("/updateproduct", { state: { product } });
+  };
 
   return (
     <Layout>
@@ -81,7 +101,7 @@ const navigate = useNavigate()
             </Tab>
           </TabList>
 
-          {/* product section */}
+          {/* Product section */}
           <TabPanel>
             <h1 className="text-center mb-5 text-3xl font-semibold underline mt-5">
               Product Details
@@ -183,76 +203,63 @@ const navigate = useNavigate()
             </div>
           </TabPanel>
 
-          {/* // oreder section */}
+          {/* Orders section */}
           <TabPanel>
             <h2 className="text-xl font-semibold mt-4">All Orders</h2>
-            <div className="">
+            <div>
               <table className="w-full text-sm text-left text-gray-500">
                 <thead className="text-xs border border-gray-600 text-black uppercase bg-gray-200 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]">
                   <tr>
-                    <th scope="col" className="px-6 py-3">
-                      Payment Id
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Image
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Title
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Price
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Category
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Name
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Address
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Pincode
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Phone Number
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Email
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Date
-                    </th>
+                    <th scope="col" className="px-6 py-3">Payment Id</th>
+                    <th scope="col" className="px-6 py-3">image</th>
+                    <th scope="col" className="px-6 py-3">Title</th>
+                    <th scope="col" className="px-6 py-3">Price</th>
+                    <th scope="col" className="px-6 py-3">Category</th>
+                    <th scope="col" className="px-6 py-3">Name</th>
+                    <th scope="col" className="px-6 py-3">Address</th>
+                    <th scope="col" className="px-6 py-3">Pincode</th>
+                    <th scope="col" className="px-6 py-3">Phone Number</th>
+                    <th scope="col" className="px-6 py-3">Email</th>
+                    <th scope="col" className="px-6 py-3">Date</th>
                   </tr>
                 </thead>
-                <tbody className="">
-                  <tr className="bg-gray-50 border-b dark:border-gray-700">
-                    <td className="px-6 py-4 text-black">1</td>
-                    <td className="px-6 py-4">
-                      <img
-                        className="w-16"
-                        src="https://dummyimage.com/720x400"
-                        alt="Product"
-                      />
-                    </td>
-                    <td className="px-6 py-4 text-black">Product Title</td>
-                    <td className="px-6 py-4 text-black">₹100</td>
-                    <td className="px-6 py-4 text-black">Category Name</td>
-                    <td className="px-6 py-4 text-black">Customer Name</td>
-                    <td className="px-6 py-4 text-black">Customer Address</td>
-                    <td className="px-6 py-4 text-black">123456</td>
-                    <td className="px-6 py-4 text-black">123-456-7890</td>
-                    <td className="px-6 py-4 text-black">
-                      customer@example.com
-                    </td>
-                    <td className="px-6 py-4 text-black">12 Aug 2019</td>
-                  </tr>
+                <tbody>
+                  {orders.map((order, orderIndex) => (
+                    <React.Fragment key={orderIndex}>
+                      {order.products.map((product, productIndex) => (
+                        
+                        <tr key={productIndex} className="bg-gray-50 border-b dark:border-gray-700">
+                            <td  className="px-6 py-4 text-black">{productIndex +1}</td>
+                              <td className="px-6 py-4 text-black">
+                                <img src={product.item.imageUrl} alt={product.item.title} className="w-14" />
+                              </td>
+                              <td  className="px-6 py-4 text-black">{product.item.title}</td>
+                              <td  className="px-6 py-4 text-black">₹{product.item.price}</td>
+                              <td  className="px-6 py-4 text-black">{product.item.category}</td>
+                          {productIndex === 0 && (
+                            <>
+                            
+                              <td rowSpan={order.products.length} className="px-6 py-4 text-black">{order.deliveryInfo.name}</td>
+                              <td rowSpan={order.products.length} className="px-6 py-4 text-black">{order.deliveryInfo.address}</td>
+                              <td rowSpan={order.products.length} className="px-6 py-4 text-black">{order.deliveryInfo.pincode}</td>
+                              <td rowSpan={order.products.length} className="px-6 py-4 text-black">{order.deliveryInfo.phone}</td>
+                              <td rowSpan={order.products.length} className="px-6 py-4 text-black">{order.deliveryInfo.email}</td>
+                              <td rowSpan={order.products.length} className="px-6 py-4 text-black">
+                                {new Date().toLocaleDateString()}
+                              </td>
+                            </>
+                          )}
+                        </tr>
+                      ))}
+                    </React.Fragment>
+                  ))}
                 </tbody>
               </table>
             </div>
           </TabPanel>
+
+          {/* Users section */}
           <TabPanel>
-            {/* user section */}
             <h2 className="text-xl font-semibold mt-4">All Users</h2>
             <div className="">
               <table className="w-full text-sm text-left text-gray-500">
@@ -295,7 +302,7 @@ const navigate = useNavigate()
                   </tr>
                 </tbody>
               </table>
-            </div>{" "}
+            </div>
           </TabPanel>
         </Tabs>
       </div>

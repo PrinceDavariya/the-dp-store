@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { set, ref, getDatabase, push } from "firebase/database";
 import { appfb } from "../../firebase/firebase";
 import { useNavigate } from "react-router-dom";
+import { data } from "autoprefixer";
 
 function AddProductForm() {
   const [title, setTitle] = useState("");
@@ -39,7 +40,8 @@ function AddProductForm() {
         imageUrl: imageUrl,
         imageUrl2: imageUrl2,
         id:newProductRef.key,
-        date:Date.now().toString()
+        data:new Date().toLocaleDateString()
+
       });
       alert("Product added successfully");
       console.log("Product added: ", { title, price, category, subcategory, imageUrl });

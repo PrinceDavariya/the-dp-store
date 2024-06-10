@@ -11,7 +11,7 @@ function Navbar() {
   // context 
   
   const context = useContext(MyContext);
-  const { setproducturl } = context;
+  const { setproducturl,cartproduct ,cartlength} = context;
   const navigate = useNavigate()
   useEffect(() => {
     // navigate('/')
@@ -82,7 +82,7 @@ function Navbar() {
           <Link to={'/cart'} className="flex items-center relative ml-2">
             <i className="ri-handbag-line" />
             <div className="bg-red-500 top-[-2px] left-[5px] text-sm absolute text-white w-4 h-4 flex justify-center items-center rounded-full ml-1">
-              1
+              {cartlength.length}
             </div>
           </Link>
           <li className="ml-2">

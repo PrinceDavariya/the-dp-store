@@ -44,8 +44,7 @@ function Allproduct({ data }) {
     return () => unsubscribe();
   }, [producturl]);
 
-  console.log("Product Categories:", productCategories);
-
+ 
   const handleProductClick = async (products) => {
     navigate("/productshow", { state: { products } });
   };

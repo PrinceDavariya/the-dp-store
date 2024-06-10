@@ -1,65 +1,136 @@
 import React, { useContext, useEffect, useState } from "react";
 import MyContext from "../../context/data/Mycontext";
 import Layout from "../../components/layout/Layout";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Toast } from "flowbite-react";
+import { useNavigate } from "react-router-dom";
+import { getDatabase, push, ref, set } from "firebase/database";
+import { appfb } from "../../firebase/firebase";
 
 function Cart() {
-  const { cartproduct, setCartproduct, setDeliveryDetails } =
-    useContext(MyContext);
+  const {
+    cartproduct,
+    setCartproduct,
+    setDeliveryDetails,
+    setorederdetail,
+    setcartlength,
+  } = useContext(MyContext);
+  const [orderPlaced, setOrderPlaced] = useState(false);
+  const navigate = useNavigate();
 
   const [products, setProducts] = useState(() => {
     const storedProducts = localStorage.getItem("cartproduct");
     return storedProducts ? JSON.parse(storedProducts) : [];
   });
 
+  // Ensure local storage is updated whenever products change
   useEffect(() => {
-    localStorage.setItem("cartproduct", JSON.stringify(products));
-  }, [products]);
+    if (!orderPlaced) {
+      localStorage.setItem("cartproduct", JSON.stringify(products));
+    }
+  }, [products, orderPlaced]);
 
+  // Ensure products are updated when cartproduct changes
   useEffect(() => {
     if (cartproduct && cartproduct.item && cartproduct.item.title) {
       setProducts((prevProducts) => {
-        return [...prevProducts, cartproduct];
+        const existingProductIndex = prevProducts.findIndex(
+          (product) =>
+            product.item.title === cartproduct.item.title &&
+            product.size === cartproduct.size
+        );
+
+        if (existingProductIndex !== -1) {
+          // If the product with the same title and size exists, update the quantity
+          const updatedProducts = [...prevProducts];
+          updatedProducts[existingProductIndex].quantity += cartproduct.quantity;
+          return updatedProducts;
+        } else {
+          // If the product with the same title and size doesn't exist, add it to the cart
+          return [...prevProducts, cartproduct];
+        }
       });
     }
   }, [cartproduct]);
+
+  useEffect(() => {
+    setcartlength(products);
+  }, [products]);
 
   const handleRemoveProduct = (index) => {
     const updatedProducts = products.filter((_, i) => i !== index);
     setProducts(updatedProducts);
     setCartproduct(updatedProducts);
+    localStorage.setItem("cartproduct", JSON.stringify(updatedProducts));
+    toast.success("Item Remove Successfully");
   };
 
   const handleQuantityChange = (index, delta) => {
     const updatedProducts = products.map((product, i) =>
-      i === index
-        ? { ...product, quantity: Math.max(1, product.quantity + delta) }
-        : product
+      i === index ? { ...product, quantity: Math.max(1, product.quantity + delta) } : product
     );
     setProducts(updatedProducts);
     setCartproduct(updatedProducts);
-    toast("Your Order Confirmed!");
   };
 
   const taxRate = 0.08;
   const calculateTax = (price) => (price * taxRate).toFixed(2);
 
-  const totalPrice = products.reduce(
-    (total, product) => total + product.item.price * product.quantity,
-    0
-  );
-  const totalDiscount = products.reduce(
-    (total, product) => total + product.discount * product.quantity,
-    0
-  );
-  const totalTax = products.reduce(
-    (total, product) =>
-      total + parseFloat(calculateTax(product.item.price * product.quantity)),
-    0
-  );
+  const totalPrice = products.reduce((total, product) => total + product.item.price * product.quantity, 0);
+  const totalDiscount = products.reduce((total, product) => total + product.discount * product.quantity, 0);
+  const totalTax = products.reduce((total, product) => total + parseFloat(calculateTax(product.item.price * product.quantity)), 0);
   const totalAmount = totalPrice - totalDiscount + totalTax;
+
+  // State variables to hold delivery details
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+
+  const handleSaveDeliveryDetails = async (e) => {
+    e.preventDefault();
+    const deliveryInfo = {
+      name,
+      address,
+      pincode,
+      city,
+      state,
+      phone,
+      email,
+    };
+    const orderInfo = {
+      deliveryInfo,
+      products,
+      totalPrice,
+      totalDiscount,
+      totalTax,
+      totalAmount,
+    };
+    setorederdetail(orderInfo);
+    setDeliveryDetails(deliveryInfo);
+
+    // Save data to Firebase
+    const db = getDatabase(appfb);
+    const newOrderRef = push(ref(db, 'orders'));
+    set(newOrderRef, orderInfo)
+      .then(() => {
+        toast.success("Your Order Confirmed");
+        localStorage.removeItem("cartproduct");
+        setOrderPlaced(true);
+        // Navigate to home after a brief delay
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+      })
+      .catch((error) => {
+        console.error("Error saving data to Firebase: ", error);
+        toast.error("Failed to confirm order. Please try again.");
+      });
+  };
 
   if (products.length === 0) {
     return (
@@ -71,35 +142,9 @@ function Cart() {
     );
   }
 
-  // State variables to hold delivery details
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [pincode, setPincode] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-
-  const handleSaveDeliveryDetails = () => {
-    const deliveryInfo = {
-      name,
-      address,
-      pincode,
-      city,
-      state,
-      phone,
-      email,
-    };
-    setDeliveryDetails(deliveryInfo);
-    // alert('ok')
-    <Toast>
-      <div className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200"></div>
-      <div className="ml-3 text-sm font-normal">Item moved successfully.</div>
-      <Toast.Toggle />
-    </Toast>;
-  };
   return (
     <Layout>
+      <ToastContainer />
       <div className="flex flex-wrap min-h-screen">
         <div className="w-2/3 p-2">
           <h1 className="w-full text-center text-2xl font-bold m-5">
@@ -144,15 +189,15 @@ function Cart() {
                   </p>
                 </div>
                 <div className="flex justify-between items-center mt-4 space-x-4">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center font-bold space-x-2">
                     <button
                       onClick={() => handleQuantityChange(index, -1)}
-                      className="bg-red-500 text-white text-[18px] px-2 py-0.5 rounded"
+                      className="bg-red-500 text-white text-[18px] px-2.5 py-0.5 rounded"
                       disabled={product.quantity === 1}
                     >
                       -
                     </button>
-                    <p className="border text-gray-700 text-[18px] px-2 py-0.5 rounded">
+                    <p className="border font-medium text-gray-700 text-[18px] px-2 py-0.5 rounded">
                       {product.quantity}
                     </p>
                     <button
@@ -176,7 +221,7 @@ function Cart() {
         <div className="w-1/3 p-4">
           <div className="container mx-auto p-4 bg-white rounded shadow-md">
             <h3 className="text-xl font-semibold mb-4">Delivery</h3>
-            <form>
+            <form onSubmit={handleSaveDeliveryDetails}>
               <input
                 type="text"
                 placeholder="Name"
@@ -196,7 +241,7 @@ function Cart() {
               />
 
               <input
-                type="text"
+                type="number"
                 placeholder="Pincode"
                 required
                 className="block w-full p-2 mb-4 border rounded"
@@ -224,6 +269,7 @@ function Cart() {
 
               <input
                 type="tel"
+                maxLength={10}
                 placeholder="Phone No."
                 required
                 className="block w-full p-2 mb-4 border rounded"
@@ -274,9 +320,8 @@ function Cart() {
                   </tr>
                 </tbody>
                 <button
-                  type="button"
-                  onClick={handleSaveDeliveryDetails}
-                  className="bg-blue-500 mt-4 w-[full]   ml-[40%] text-white px-6 font-semibold py-2 rounded"
+                  type="submit"
+                  className="bg-blue-500 mt-4 ml-[30%] text-white px-6 font-semibold py-2 rounded"
                 >
                   Order Confirm
                 </button>

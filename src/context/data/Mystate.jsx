@@ -6,10 +6,12 @@ function Mystate(props) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [producturl, setproducturl] = useState("");
   const [cartproduct, setCartproduct] = useState([]);
-  const [deliveryDetails, setDeliveryDetails] = useState('')
-
-  console.log(deliveryDetails);
-  // it can stre all product
+  const [deliveryDetails, setDeliveryDetails] = useState([])
+  const [cartlength, setcartlength] = useState('')
+// it can save order detail for admin
+ const [orederdetail, setorederdetail] = useState([])
+ 
+  // it can st0re all product
   const addProduct = (newProduct) => {
     setallProducts(newProduct);
   };
@@ -33,7 +35,8 @@ function Mystate(props) {
           setproducturl,
           producturl,
           alldetailproduct,
-          cartproduct,setCartproduct,setDeliveryDetails
+          cartproduct,setCartproduct,setDeliveryDetails,setorederdetail
+          ,setcartlength,cartlength,deliveryDetails,orederdetail
         }}
       >
         {props.children}
