@@ -2,12 +2,13 @@ import React, { useContext, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
 import MyContext from "../../context/data/Mycontext";
+import { ToastContainer, toast } from "react-toastify";
 
 const SingleProduct = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { product } = location.state || {};
-
+  console.log(product);
   if (!product) {
     return (
       <Layout>
@@ -23,7 +24,7 @@ const SingleProduct = () => {
   }
 
   const [quantity, setQuantity] = useState(1);
-  const [size, setSize] = useState("L");
+  const [size, setSize] = useState();
   const [discount, setDiscount] = useState("100");
 
   const { alldetailproduct } = useContext(MyContext);
@@ -34,7 +35,7 @@ const SingleProduct = () => {
 
   const handleOrder = (item) => {
     if (!size) {
-      alert('Please select a size.');
+toast.error("Please Select Size")
       return;
     }
     alldetailproduct(item, size, quantity, discount);
@@ -43,6 +44,7 @@ const SingleProduct = () => {
 
   return (
     <Layout>
+      <ToastContainer/>
       <button
         className="text-gray-500 hover:text-gray-700 focus:outline-none"
         onClick={() => navigate(-1)}

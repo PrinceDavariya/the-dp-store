@@ -54,6 +54,7 @@ function Allproduct({ data }) {
       <h1 className="text-2xl font-bold mb-11 text-center w-full mt-11">
         Category
       </h1>
+     
       <div className="flex flex-wrap justify-center gap-4">
         {loading ? (
           <p>Loading...</p>
@@ -78,8 +79,10 @@ function Allproduct({ data }) {
             </div>
           ))
         ) : (
-          <p>No products available.</p>
-        )}
+          <div className="flex items-center justify-center min-h-screen">
+          <div className="w-16 h-16 border-4 border-t-4 border-t-transparent border-blue-500 rounded-full animate-spin"></div>
+        </div>
+)}
       </div>
     </div>
   );

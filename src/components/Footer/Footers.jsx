@@ -6,7 +6,7 @@ const Footer = () => {
     <div className="bg-gray-100 py-8 px-4 mt-[4%] lg:px-16">
       <div className="container mx-auto flex flex-wrap justify-center items-start">
         {/* Lists Section */}
-        <div className="flex w-auto max-lg:m-auto ml-[30%] m-auto mb-8 lg:mb-0">
+        <div className="flex w-auto max-lg:m-auto ml-[30%]  cursor-pointer m-auto mb-8 lg:mb-0">
           {/* Need Help Section */}
           <ul className="w-full lg:w-auto mr-8 mb-6 lg:mb-0">
             <h3 className="font-semibold text-lg mb-2">NEED HELP</h3>

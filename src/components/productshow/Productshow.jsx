@@ -6,6 +6,7 @@ const Productshow = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const  {products}  = location.state;
+  console.log(products);
    if (!products || products.length === 0) {
     return (
       <Layout>
@@ -28,16 +29,22 @@ const Productshow = () => {
       >
         <i className="ri-arrow-left-circle-fill text-4xl"></i>
       </button>
-      <div className="flex gap-8 p-4">
-        {products.map((prod, index) => (
-          <Link  to={'/singleproduct'} state={{ product: prod}} key={index} className="bg-gray-300">
-            <img src={prod.imageUrl} className="w-[300px] " alt={prod.title} />
-            <h3>{prod.title}</h3>
-            <p>{prod.price}</p>
-            
-          </Link>
-        ))}
-      </div>
+      <div className="flex flex-wrap gap-8  p-4">
+      {products.map((prod, index) => (
+        <Link 
+          to={'/singleproduct'} 
+          state={{ product: prod }} 
+          key={index} 
+          className="bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300 ease-in-out p-2 w-[300px] h-[500px] "
+        >
+          <img src={prod.imageUrl} className="w-full h-96 object-cover rounded-t-lg" alt={prod.title} />
+          <div className="p-4">
+            <h3 className="text-lg font-semibold text-gray-800">{prod.title}</h3>
+            <p className="text-lg font-bold text-indigo-600">${prod.price}</p>
+          </div>
+        </Link>
+      ))}
+    </div>
     </Layout>
   );
 };

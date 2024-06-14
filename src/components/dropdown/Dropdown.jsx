@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { getDatabase, onValue, ref } from "firebase/database";
 import { appfb } from "../../firebase/firebase";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import MyContext from "../../context/data/Mycontext";
 
 const Dropdown = () => {
@@ -71,6 +71,7 @@ const Dropdown = () => {
         return [];
     }
   })();
+  
 
   const handleItemClick = async (item) => {
     setLoading(true);
@@ -90,7 +91,7 @@ const Dropdown = () => {
   };
 
   return (
-    <div className="flex w-[30%]">
+    <div className="flex w-[30%] max-md:w-full">
       {categories.map((category, index) => (
         <div
           key={index}
@@ -98,14 +99,16 @@ const Dropdown = () => {
           onMouseEnter={() => setHoveredCategory(category.name)}
           onMouseLeave={() => setHoveredCategory(null)}
         >
-          <button
+          <div
+          
             className="text-black bg-white hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium px-5 py-2 text-center inline-flex items-center"
             type="button"
             onClick={() => setSelectedCategory(category.name)}
+            
           >
             {category.name}
             <i className="ri-arrow-drop-down-line ml-1 text-2xl"></i>
-          </button>
+          </div>
           {hoveredCategory === category.name && (
             <div className="absolute top-full left-0 z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
               <ul className="py-2 text-sm text-gray-700">

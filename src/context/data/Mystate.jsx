@@ -10,7 +10,8 @@ function Mystate(props) {
   const [cartlength, setcartlength] = useState('')
 // it can save order detail for admin
  const [orederdetail, setorederdetail] = useState([])
- 
+ const [loading, setLoading] = useState(true);
+
   // it can st0re all product
   const addProduct = (newProduct) => {
     setallProducts(newProduct);
@@ -36,7 +37,7 @@ function Mystate(props) {
           producturl,
           alldetailproduct,
           cartproduct,setCartproduct,setDeliveryDetails,setorederdetail
-          ,setcartlength,cartlength,deliveryDetails,orederdetail
+          ,setcartlength,cartlength,deliveryDetails,orederdetail,loading,setLoading
         }}
       >
         {props.children}

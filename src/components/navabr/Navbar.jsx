@@ -6,26 +6,22 @@ import MyContext from "../../context/data/Mycontext";
 function Navbar() {
   const [showInput, setShowInput] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Men");
-  const [searchText, setSearchText] = useState(''); // New state for search text
-  const [filteredProducts, setFilteredProducts] = useState([]); // New state for filtered products
-
-  // context
+  const [searchText, setSearchText] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
   const context = useContext(MyContext);
   const { setproducturl, cartproduct, allproducts, cartlength } = context;
   const navigate = useNavigate();
+
   useEffect(() => {
-    // navigate('/')
     setproducturl(selectedCategory);
   }, [selectedCategory]);
 
   useEffect(() => {
-     const flattenedProducts = allproducts.reduce((acc, curr) => {
+    const flattenedProducts = allproducts.reduce((acc, curr) => {
       return [...acc, ...curr.products];
     }, []);
-  
-  
-    // Update filtered products based on search text
+
     const filteredData = flattenedProducts.filter((product) => {
       const lowerCaseText = searchText.toLowerCase();
       return (
@@ -35,76 +31,93 @@ function Navbar() {
       );
     });
     setFilteredProducts(filteredData);
-  }, [searchText]);
-  
+  }, [searchText, allproducts]);
+
   const handleSearchChange = (event) => {
     setSearchText(event.target.value);
   };
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const logout = () => {
+    localStorage.clear("user");
+    window.location.href = "/";
+  };
+
   return (
     <>
-      <div className="bg-red-600 text-white pl-3 h-[34px] items-center font-semibold flex">
+      <div className="bg-red-600 max-md:justify-center max-md:w-full text-white pl-3 h-[34px] items-center font-semibold flex px-6  ">
         <h1>
-          <a href="/">The DP Store</a>
+          <a href="/home">The DP Store</a>
         </h1>
-        <div className="ml-[130px] gap-4 flex">
+        <div className="gap-2 ml-[-20%] flex flex-wrap md:ml-[130px] md:gap-4">
           <h3
-            className="hover:bg-white hover:text-red-600 transition-colors duration-200 px-2 py-1 cursor-pointer"
+            className="hover:bg-white max-md:border hover:text-red-600 transition-colors duration-200 px-2 py-1 cursor-pointer"
             onClick={() => setSelectedCategory("Men")}
           >
             MEN
           </h3>
           <h3
-            className="hover:bg-white hover:text-red-600 transition-colors duration-200 px-2 py-1 cursor-pointer"
+            className="hover:bg-white max-md:border hover:text-red-600 transition-colors duration-200 px-2 py-1 cursor-pointer"
             onClick={() => setSelectedCategory("Women")}
           >
             WOMEN
           </h3>
           <h3
-            className="hover:bg-white hover:text-red-600 transition-colors duration-200 px-2 py-1 cursor-pointer"
+            className="hover:bg-white max-md:border hover:text-red-600 transition-colors duration-200 px-2 py-1 cursor-pointer"
             onClick={() => setSelectedCategory("Kids")}
           >
             KIDS
           </h3>
-          <Link
-            to={"/dashboard"}
-            className="hover:bg-white hover:text-red-600 transition-colors duration-200 px-2 py-1"
-          >
-            ADMIN
-          </Link>
+          {user?.user?.email === "admin@gmail.com" && (
+            <div className="flow-root">
+              <Link to={"/dashboard"} className="block p-2 font-medium  text-white">
+                Admin
+              </Link>
+            </div>
+          )}
+          
         </div>
+        {/* <div className="">
+           <i class=" ri-menu-unfold-4-line"></i> 
+        </div> */}
       </div>
 
-      <div className="flex items-center px-2 justify-between">
+      <div className="flex flex-col md:flex-row items-center px-2 justify-between">
         <Dropdown />
-        <ul className="flex gap-4 items-center text-xl">
-       <div className="h-[20px] text-sm">
+        <ul className="flex flex-col md:flex-row gap-2 md:gap-4 items-center text-lg md:text-xl mt-2 md:mt-0">
+          <div className="relative text-sm w-full md:w-auto">
             <input
               type="text"
               placeholder="Search"
-              className="px-2 py-1 mr-2 border border-gray-300 rounded transition-all duration-300 transform 
-               "
+              className="px-2 py-1 mr-2 border border-gray-300 rounded transition-all duration-300 transform w-full md:w-auto"
               onChange={handleSearchChange}
             />
             <i className="ri-search-line hover:text-red-500 duration-100" />
-               {filteredProducts.map((product) => (
-            <li key={product.id}>{product.title}
-            </li>
-          ))}          
+            {searchText && (
+              <div className="absolute bg-white border w-full md:w-[120%] border-gray-300 mt-1 rounded max-h-72 overflow-y-auto z-10">
+                {filteredProducts.map((product) => (
+                  <Link
+                    key={product.id}
+                    to={`/singleproduct/`}
+                    state={{ product: product }}
+                    className="no-underline text-black"
+                  >
+                    <div className="px-2 py-1 flex hover:bg-gray-200 font-semibold text-[14px] border items-center cursor-pointer">
+                      <img
+                        src={product.imageUrl}
+                        className="h-16 w-16 rounded-full object-cover object-top mr-3"
+                        alt={product.title}
+                      />
+                      {product.title}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
-          <li>
-            <img
-              src="https://firebasestorage.googleapis.com/v0/b/the-dm-store.appspot.com/o/k%2FScreenshot%20(4).png?alt=media&token=0ef67359-ad7f-4585-88db-a5f8d8475c93"
-              alt="User"
-              className="w-8 h-8 rounded-full"
-            />
-          </li>
-          <li className="ml-2">
-            <i className="ri-heart-3-line" />
-          </li>
           <Link to={"/cart"} className="flex items-center relative ml-2">
             <i className="ri-handbag-line" />
-            <div className="bg-red-500 top-[-2px] left-[5px] text-sm absolute text-white w-4 h-4 flex justify-center items-center rounded-full ml-1">
+            <div className="bg-red-500 top-[-2px] left-[5px] text-sm absolute text-white w-4 h-4 flex justify-center items   center rounded-full ml-1">
               {cartlength.length}
             </div>
           </Link>
@@ -112,7 +125,7 @@ function Navbar() {
             <i className="ri-red-packet-fill" />
           </li>
           <li className="ml-2">
-            <button className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-[15px]">
+            <button onClick={logout} className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-[15px]">
               Log out
             </button>
           </li>
@@ -123,3 +136,4 @@ function Navbar() {
 }
 
 export default Navbar;
+
