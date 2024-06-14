@@ -1,22 +1,45 @@
 import React, { useState, useEffect, useContext } from "react";
 import Dropdown from "../dropdown/Dropdown";
 import { Link, useNavigate } from "react-router-dom";
-import Allproduct from "../../pages/allproducts/Allproduct";
 import MyContext from "../../context/data/Mycontext";
 
 function Navbar() {
   const [showInput, setShowInput] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Men");
+  const [searchText, setSearchText] = useState(''); // New state for search text
+  const [filteredProducts, setFilteredProducts] = useState([]); // New state for filtered products
 
-  // context 
-  
+  // context
+
   const context = useContext(MyContext);
-  const { setproducturl,cartproduct ,cartlength} = context;
-  const navigate = useNavigate()
+  const { setproducturl, cartproduct, allproducts, cartlength } = context;
+  const navigate = useNavigate();
   useEffect(() => {
     // navigate('/')
-    setproducturl(selectedCategory)
-      }, [selectedCategory]);
+    setproducturl(selectedCategory);
+  }, [selectedCategory]);
+
+  useEffect(() => {
+     const flattenedProducts = allproducts.reduce((acc, curr) => {
+      return [...acc, ...curr.products];
+    }, []);
+  
+  
+    // Update filtered products based on search text
+    const filteredData = flattenedProducts.filter((product) => {
+      const lowerCaseText = searchText.toLowerCase();
+      return (
+        product.category.toLowerCase().includes(lowerCaseText) ||
+        product.title.toLowerCase().includes(lowerCaseText) ||
+        product.subcategory.toLowerCase().includes(lowerCaseText)
+      );
+    });
+    setFilteredProducts(filteredData);
+  }, [searchText]);
+  
+  const handleSearchChange = (event) => {
+    setSearchText(event.target.value);
+  };
 
   return (
     <>
@@ -55,20 +78,20 @@ function Navbar() {
       <div className="flex items-center px-2 justify-between">
         <Dropdown />
         <ul className="flex gap-4 items-center text-xl">
-          <li
-            className="relative flex items-center"
-            onMouseEnter={() => setShowInput(true)}
-            onMouseLeave={() => setShowInput(false)}
-          >
+       <div className="h-[20px] text-sm">
             <input
               type="text"
               placeholder="Search"
-              className={`px-2 py-1 mr-2 border border-gray-300 rounded transition-all duration-300 transform ${
-                showInput ? "translate-x-0 opacity-100" : "translate-x-5 opacity-0"
-              }`}
+              className="px-2 py-1 mr-2 border border-gray-300 rounded transition-all duration-300 transform 
+               "
+              onChange={handleSearchChange}
             />
             <i className="ri-search-line hover:text-red-500 duration-100" />
-          </li>
+               {filteredProducts.map((product) => (
+            <li key={product.id}>{product.title}
+            </li>
+          ))}          
+          </div>
           <li>
             <img
               src="https://firebasestorage.googleapis.com/v0/b/the-dm-store.appspot.com/o/k%2FScreenshot%20(4).png?alt=media&token=0ef67359-ad7f-4585-88db-a5f8d8475c93"
@@ -79,7 +102,7 @@ function Navbar() {
           <li className="ml-2">
             <i className="ri-heart-3-line" />
           </li>
-          <Link to={'/cart'} className="flex items-center relative ml-2">
+          <Link to={"/cart"} className="flex items-center relative ml-2">
             <i className="ri-handbag-line" />
             <div className="bg-red-500 top-[-2px] left-[5px] text-sm absolute text-white w-4 h-4 flex justify-center items-center rounded-full ml-1">
               {cartlength.length}
